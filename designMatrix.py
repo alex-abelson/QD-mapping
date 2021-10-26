@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Oct 21 15:11:27 2021
-
 Loads an image and an .npz file containing the centroid locations of each QD in the image.
 
-@author: Alex
 """
 
 from utilities import find_index,angle_between
@@ -17,8 +14,8 @@ from pathlib import Path
 import os
 
 
-
-def NNList(vor): #Returns the nearest neighbor particles for each particle.
+#Returns the nearest neighbor particles for each particle.
+def NNList(vor):
     IndexRef = np.zeros(len(vor.points))
     IndexRef = [i for i in range(len(vor.points))]    
     NNList = []    
@@ -35,9 +32,8 @@ def NNList(vor): #Returns the nearest neighbor particles for each particle.
         
     return IndexRef, NNList_out, NNList
         
-    
-def NNDistance(vor,NNList): #Calculates the avg and std distance between Particle i and its NNs.
-
+#Calculates the avg and std distance between Particle i and its NNs.  
+def NNDistance(vor,NNList): 
     avgDistance = []
     stdDistance = []
     Distances = []
@@ -62,9 +58,9 @@ def NNDistance(vor,NNList): #Calculates the avg and std distance between Particl
 
     return avgDistance, stdDistance, Distances
 
-
-def BondOrder(vor, NNList):
-    
+#Complex set of calculations that identifies each QD and its vertices,
+#then calculates the bond order parameters.
+def BondOrder(vor, NNList): 
     Psi4 = []
     Psi6 = []
     argListSin_6 = []
@@ -106,8 +102,6 @@ def BondOrder(vor, NNList):
             angle_temp=angle_between(vor.points[ParticleIndex]-vor.points[NeighborIndex], np.array([1,0]))
             AngleListRow.append(angle_temp)
             
-            
-
             psi_6_sum_temp = 0
             psi_4_sum_temp = 0
 
@@ -144,10 +138,9 @@ def BondOrder(vor, NNList):
     
     return Psi4, Psi6, argListSin_6, argListCos_6, argListSin_4, argListCos_4
 
-
+#Calculates the area of each Voronoi cell
 def CalcArea(vor):
-    Areas = np.zeros(vor.npoints)
-    
+    Areas = np.zeros(vor.npoints)    
     for i,reg_num in enumerate(vor.point_region):
         indices = vor.regionsp[reg_num]
         if -1 in indices:
@@ -157,10 +150,9 @@ def CalcArea(vor):
             
     return Areas
 
-
+#Removes QDs with Voronoi vertices within buffer pixels of the edge.
 def RemoveEdge(vor,xsize,ysize, buffer):
-    ToDelete = []
-    
+    ToDelete = []  
     for i,x in enumerate(vor.points):  
         for item in (vor.regions[vor.point_region[i]]):     
             if item==-1 or vor.vertices[item][0]<buffer or vor.vertices[item][1]<buffer or vor.vertices[item][0]>(ysize-buffer) or vor.vertices[item][1]>(xsize-buffer):
@@ -169,24 +161,24 @@ def RemoveEdge(vor,xsize,ysize, buffer):
 
     return ToDelete    
 
+#Generate Voronoi diagram for a set of centroids.
 def RunVoronoi(centroids, image, filename, ShowVoronoi):
     #centroids = np.load(centroid_file)
     x = centroids[:,1]
     y = centroids[:,0] 
-
-    vor = Voronoi(np.vstack((x,y)).T)    
-    if ShowVoronoi:
-        
-        if not os.path.exists("outputs"):
-            os.mkdir("outputs")
-        output_name="outputs/"+"voronoifig_" + Path(filename).stem
-        
+    vor = Voronoi(np.vstack((x,y)).T)    #Calculate Voronoi
+    if ShowVoronoi:        
+      
         fig, ax = plt.subplots()
         skimage.io.imshow(image)
         fig = voronoi_plot_2d(vor,ax=ax, show_vertices=False, linewidth = 2, point_size = 2)
+       
+        #Save Voronoi diagram (uncolored)
+        if not os.path.exists("outputs"):
+            os.mkdir("outputs")
+        output_name="outputs/"+"voronoifig_" + Path(filename).stem 
         plt.savefig(output_name,dpi=1200)
-        plt.show()
-        
+        plt.show()        
     return x,y,vor
 
     
