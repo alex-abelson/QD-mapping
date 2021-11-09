@@ -5,6 +5,7 @@
 
 import numpy as np
 import skimage.io
+import matplotlib.pyplot as plt
 
 def LoadImage(fileName,x_size, y_size):
     y_size=int(y_size)
@@ -40,3 +41,12 @@ def angle_betweenU(v1, v2): #Not sure whether this one or the function above is 
     if minor == 0:
         pass
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+def PlotImage(image):
+    skimage.io.imshow(image)
+    plt.show()
+    
+
+def GetDimensions(fileName):
+    image = skimage.io.imread(fileName)[:,:] #import image
+    return image.shape

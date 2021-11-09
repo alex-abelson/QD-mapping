@@ -14,28 +14,32 @@ This program has three functions:
 """
 
 #################### Runfile Settings #################################################
-CentroidsRun = True
-DesignMatrixRun = True
+CentroidsRun = False
+DesignMatrixRun = False
 ClusterRun = True
 CleanDesignMatrix = True
-directory = r'C:/Users/Alex/Desktop/SEM Image Analysis Photobase/TBAOH Data - paper/TBAH 200 uM/'
+directory = r'C:/Users/Alex/Desktop/SEM Image Analysis Photobase/PBG z gradient check/'
+
+sizeSet = True
 x_size = int(1536)
 y_size = int(1024)
 
+
+
 #################### Centroids ####################################################
 #Set blob detection parameters.
-min_sigma = 3.0
-max_sigma = 3.4
-threshold = 0.02
-ShowBlobs = False
+min_sigma = 2.8
+max_sigma = 3.0
+threshold = 0.005
+ShowBlobs = True
 
 #Subpixel Fitting
 ShowSubpixels = False
 conversion = 1.48 #pixels/nm
-spacing = 8*conversion #sets the size of the window for Gaussian fitting
+spacing = 6.5*conversion #sets the size of the window for Gaussian fitting
 
 ################### DesignMatrix ##################################################
-buffer = 15 #number of pixels on edge of image to remove QDs
+buffer = 10 #number of pixels on edge of image to remove QDs
 ShowVoronoi = False
 #Color Voronoi Plot
 DataColumn=3
@@ -138,7 +142,7 @@ def MakeDesignMatrix(directory, filename,centroids,x_size, y_size, ShowVoronoi):
     #Generate the structural parameters. These are [n,1] arrays.
     print ("Calculating structural parameters...")
     IndexRef, NNList_out, NNList = dm.NNList(vor)
-    avgDistance, stdDistance, Distances = dm.NNDistance(vor, NNList)
+    avgDistance, stdDistance, Distances, NNDiff = dm.NNDistance(vor, NNList)
     Psi4, Psi6, argListSin_6, argListCos_6, argListSin_4, argListCos_4 = dm.BondOrder(vor, NNList)
 
     #Build design matrix stack from the structural [n,1] arrays above.
@@ -150,13 +154,14 @@ def MakeDesignMatrix(directory, filename,centroids,x_size, y_size, ShowVoronoi):
                         Psi4,           #psi-4
                         Psi6,           #psi-6
                         argListSin_4,   #sin of complex arg. of psi-4
-                        argListCos_4)   
+                        argListCos_4)   #cos of complex arg. of psi-4
     
     DesignMatrixStack = np.vstack(DesignMatrixTemp).T       
     
     #Delete edge particles  
     toDelete = dm.RemoveEdge(vor,y_size,x_size, buffer)    
-    DesignMatrix = np.delete(DesignMatrixStack,toDelete,0)
+    DesignMatrix = np.delete(DesignMatrixStack,toDelete,0)    
+    NNDiff = np.delete(NNDiff,toDelete,0)
     
     #Save Design Matrix
     if not os.path.exists(directory + "outputs"):
@@ -165,6 +170,12 @@ def MakeDesignMatrix(directory, filename,centroids,x_size, y_size, ShowVoronoi):
     header = "Image ID = " + Path(filename).stem + " Index, X, Y, Nearest Neighbors, Avg NN Distance, Psi4, Psi6, ArgSin(Psi4), ArgCos(Psi4)" 
     np.savez(output_name, DesignMatrix=DesignMatrix)
     np.savetxt(output_name + ".txt",DesignMatrix,delimiter = ',', header = header)
+    
+    output_name=directory + "outputs/" +"distances_" + Path(filename).stem 
+    np.savetxt(output_name + ".txt",Distances, delimiter = ',')
+    
+    output_name=directory + "outputs/" +"distance_diffs_" + Path(filename).stem 
+    np.savetxt(output_name + ".txt",NNDiff, delimiter = ',')
     print ("Files saved containing {} QDs.".format(len(DesignMatrix)))
     
     return DesignMatrix
@@ -200,6 +211,13 @@ if __name__ == "__main__":
         if filename.endswith(".tif"):
             print ("Processing image: " + Path(filename).stem)
             filename = directory + filename
+            
+            if sizeSet:
+            
+                x_size = ut.GetDimensions(filename)[0]
+                y_size = ut.GetDimensions(filename)[1]
+            
+            print (x_size,y_size)
             
             if CentroidsRun:
                 centroids = Particles(filename, x_size, y_size, ShowBlobs, min_sigma, max_sigma, threshold)
@@ -238,7 +256,6 @@ if __name__ == "__main__":
             continue
         print(2 * "\n")  
     
-    os.system("welcome.mp3")
     print ("Done.")
     
     

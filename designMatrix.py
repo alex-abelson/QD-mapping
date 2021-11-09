@@ -37,6 +37,7 @@ def NNDistance(vor,NNList):
     avgDistance = []
     stdDistance = []
     Distances = []
+    NNDiff = []
     
     for i,i_xy in enumerate(vor.points):
         DistanceDummy = []
@@ -48,15 +49,22 @@ def NNDistance(vor,NNList):
         if len(DistanceDummyNP!=0):
             avgDistance.append(np.mean(DistanceDummyNP))
             stdDistance.append(np.std(DistanceDummyNP))
+            Distances.append(DistanceDummy)
+            
+            #Used for caluclating the difference between shortest two distances.
+            NNDiff_temp = np.sort(DistanceDummyNP)
+            NNDiff.append(NNDiff_temp[1]-NNDiff_temp[0])
         else:
             avgDistance.append(0)
             stdDistance.append(0)
-        if len(DistanceDummyNP)==6:
-            Distances.append(DistanceDummyNP)
-        else:
-            Distances.append([0,0,0,0,0,0])
+        #if len(DistanceDummyNP)==6:
+            #Distances.append(DistanceDummyNP)
+        #else:
+            #Distances.append([0,0,0,0,0,0])
+    
+    Distances=np.hstack(Distances) 
 
-    return avgDistance, stdDistance, Distances
+    return avgDistance, stdDistance, Distances, NNDiff
 
 #Complex set of calculations that identifies each QD and its vertices,
 #then calculates the bond order parameters.

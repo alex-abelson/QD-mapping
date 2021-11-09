@@ -8,6 +8,7 @@ Created on Thu Oct 21 18:57:11 2021
 import numpy as np
 import skimage.io
 import matplotlib.pyplot as plt
+import matplotlib
 from pathlib import Path
 import os
 from sklearn import preprocessing
@@ -83,14 +84,25 @@ def ClusterFigure(directory, labels,DesignMatrix,image,filename):
     output_name=directory + "outputs/" +"clusterfig_" + Path(filename).stem
 	
     plt.close()
-    #fig, ax = plt.subplots()
+    
+    fig, ax = plt.subplots()
     skimage.io.imshow(image)
     
     if len(labels) != 0:
-        plt.scatter(DesignMatrix[:,1], DesignMatrix[:,2],  s=1.2, c=labels)
+        labels = labels
+        N = np.ptp(labels)+1
+        cmap = plt.cm.jet
+        cmaplist = [cmap(i) for i in range(cmap.N)]
+        cmap = cmap.from_list('Custom cmap', cmaplist, cmap.N)       
+        bounds = np.linspace(np.amin(labels)-.5,np.amax(labels)+.5,N+1)
+        norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)        
+        
+        scat = ax.scatter(DesignMatrix[:,1], DesignMatrix[:,2],  s=10, c=labels, cmap=cmap,  norm = norm)
+        cb = plt.colorbar(scat, spacing='proportional',ticks=np.arange(np.min(labels),np.max(labels)+1))
+      
     plt.savefig(output_name,dpi=1200)
-    #plt.show()
-    #fig.canvas.draw()
+    plt.show()
+  
     
 
 def RemoveDefectsFromClustering(directory, filename, labels, designmatrix):
