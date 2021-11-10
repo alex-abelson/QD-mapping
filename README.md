@@ -131,7 +131,7 @@ y_size = int(1024)
 **Again, depending on which of the above parameters are set to True or False, upon execution of the code, those operations will run. Each of these _if_ statements is capable of running alone because the necessary function inputs are loaded from .npz files rather than being stored as local variables.**
 
 
-# Technical Content:
+# Technical Description
 
 ## Particle Fitting
 Particle fitting is done in 2 steps. The first uses Sci-Kit Image's Laplacian of Gaussian algorithm. More information can be found [here](https://scikit-image.org/docs/stable/auto_examples/features_detection/plot_blob.html). The only variable that I had hard-wired into the function is the number of NP sizes that it tries to fit within the range between _min_sigma_ and _max_sigma_ (I have it set to 4). The seconds step of the fitting is doing the subpixel routine. This code was adapted from Ben Savitzky's code which can be found [here](https://github.com/bsavitzky/rdf). In short, this code moves around to different NPs in the image. At a particular location, it defines a sub-section of the image to use for fitting (typically around 90% of the nearest-neighbor distance), then unravels that small image into a 1D array. This 1D array is then fit with a Gaussian function, and the position of the Gaussian is used to determine the actual centroid of the NP. Apparently this method is faster than doing a true 2D fit. It seems to work pretty well.
