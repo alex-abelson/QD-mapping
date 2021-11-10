@@ -134,7 +134,23 @@ y_size = int(1024)
 ## Technical Content:
 
 ### Particle Fitting
-Particle fitting is done in 2 steps. The first uses Sci-Kit Image's Laplacian of Gaussian algorithm. More information can be found [here](https://scikit-image.org/docs/stable/auto_examples/features_detection/plot_blob.html)
+Particle fitting is done in 2 steps. The first uses Sci-Kit Image's Laplacian of Gaussian algorithm. More information can be found [here](https://scikit-image.org/docs/stable/auto_examples/features_detection/plot_blob.html). The only variable that I had hard-wired into the function is the number of NP sizes that it tries to fit within the range between _min_sigma_ and _max_sigma_ (I have it set to 4). The seconds step of the fitting is doing the subpixel routine. This code was adapted from Ben Savitzky's code which can be found [here](https://github.com/bsavitzky/rdf). In short, this code moves around to different NPs in the image. At a particular location, it defines a sub-section of the image to use for fitting (typically around 90% of the nearest-neighbor distance), then unravels that small image into a 1D array. This 1D array is then fit with a Gaussian function, and the position of the Gaussian is used to determine the actual centroid of the NP. Apparently this method is faster than doing a true 2D fit. It seems to work pretty well.
+
+### Design Matrix
+In the design matrix code there is a lot of fiddling around required to generate the structural parameters (nearest-neighbor distances, etc.). Much of this is just a matter of wrestling with the computational form of the [Voronoi decomposition](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Voronoi.html). These structural parameters include:
+- _the first three columns are: 1) particle index, 2) x position, and 3) y position and are removed in clustering_
+- Distances between a NP and all of its neighbors
+- **Average nearest neighbor distance**
+- Standard deviation in nearest neighbor distance
+- Closest nearest neighbor distance
+- Difference in distance between two closest nearest neighbors
+- **Number of nearest neighbors**
+- Area of the Voronoi cell
+- **Psi4 and Psi6 (bond order parameters, see [this](https://pubs.acs.org/doi/10.1021/acsnano.9b04951)**
+- **Complex arguments of Psi4 and Psi6**
+- 
+The ones that are bolded are actually used in the current design matrix, but they can be removed or added at will.
+
 Acknowledgements: This project was conceived of and developed while working in the laboratory of Matt Law at UC Irvine. Caroline Qian provided many of the images used to validate the software.
 
 
