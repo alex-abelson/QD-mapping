@@ -114,10 +114,9 @@ _If there are variables repeated in multiple functions, they are only defined in
 - **Save To Drive**:
   - _labels_: .txt and .npz; labels for each of the particles 
 
-### Executed Code in the Runfile
-The actual operation of the code is simplified into a series of _if_ statements at the bottom of runfile.py. These _if_ statements control which of the above functions actually run when the code is executed. It is divided so that you can , for example, identify only the particle locations for a series of images. 
+### General Runfile Parameters and Operation
+The actual operation of the code is simplified into a series of _if_ statements at the bottom of runfile.py. These _if_ statements control which of the above functions actually run when the code is executed. It is divided so that you can , for example, identify only the particle locations for a series of images. The following inputs are set at the top of runfile.py to determine what functions are performed upon execution of the code.
 
-#### General Runfile Parameters
 ```python
 CentroidsRun = False #Turns on and off the particle fitting code.
 DesignMatrixRun = False #Turns on and off the design matrix part of the code.
@@ -129,7 +128,7 @@ x_size = int(1536)
 y_size = int(1024)
 ```
 
-**Depending on which of the above parameters are set to True of false, upon execution of the code, those operations will run. Each of these _if_ statements is capable of running alone because the necessary function inputs are loaded from .npz files rather than being stored as local variables.**
+**Again, depending on which of the above parameters are set to True or False, upon execution of the code, those operations will run. Each of these _if_ statements is capable of running alone because the necessary function inputs are loaded from .npz files rather than being stored as local variables.**
 
 
 
