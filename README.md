@@ -6,7 +6,7 @@
 
 
 ### Description
-This sofwtware package takes electron microscopy images of NP superlattices and generates a series of useful graphical and numerical outputs. There are three key components: 
+This software package takes electron microscopy images of NP superlattices and generates a series of useful graphical and numerical outputs. There are three key components: 
 
 1. Identify the x,y position of NPs in the image. This is achieved using two separate steps:
  - a) First, NPs are coarsely identified using a blob-detection algorithm in Sci-Kit image.  
