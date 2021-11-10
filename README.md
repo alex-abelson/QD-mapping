@@ -131,8 +131,10 @@ y_size = int(1024)
 **Again, depending on which of the above parameters are set to True or False, upon execution of the code, those operations will run. Each of these _if_ statements is capable of running alone because the necessary function inputs are loaded from .npz files rather than being stored as local variables.**
 
 
+## Technical Content:
 
-
+### Particle Fitting
+Particle fitting is done in 2 steps. The first uses Sci-Kit Image's Laplacian of Gaussian algorithm. More information can be found [here](https://scikit-image.org/docs/stable/auto_examples/features_detection/plot_blob.html)
 Acknowledgements: This project was conceived of and developed while working in the laboratory of Matt Law at UC Irvine. Caroline Qian provided many of the images used to validate the software.
 
 
