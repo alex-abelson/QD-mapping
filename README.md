@@ -33,7 +33,10 @@ There are a variety of ways of evaluating the structural order/disorder of a lat
 ### How to install and run the project: 
 1. Download the library of python scripts and save them to a folder on your computer.
 2. Open the script titled 'runfile.py' and make any necessary settings changes (vide infra). 
-3. Navigate in the Anaconda prompt to the folder containing the scripts, then run: /python runfile.py
+3. Navigate in the Anaconda prompt to the folder containing the scripts, then run: 
+```bash
+python runfile.py
+```
 
 
 ### Scripts:
@@ -59,6 +62,8 @@ _The software is designed so that there are 4 scripts (Scripts 1-4) that contain
 When running code, all modifications are made in the runfile.py script. 
 
 ### Runfile Functions
+**All of the variables used in the runfile functions are specified manually at the top of runfile.py. The purpose of these variables are defined below.**
+
 _If there are variables repeated in multiple functions, they are only defined in the top function._
 
 #### Particles(filename, x_size, y_size, ShowBlobs, min_sigma, max_sigma, threshold)
@@ -76,7 +81,6 @@ _If there are variables repeated in multiple functions, they are only defined in
   - nothing
 
 #### Subpixel(directory, filename, centroids, x_size, y_size, conversion, spacing, ShowSubpixels)
-
 - **Inputs**: 
   - _directory_: image folder path (why is this in here?)
   - _centroids_: 2D numpy array with x,y coordinates of each NP
@@ -89,7 +93,6 @@ _If there are variables repeated in multiple functions, they are only defined in
   - _new_centroids_: .npz; see above description
 
 #### MakeDesignMatrix(directory, filename,centroids,x_size, y_size, ShowVoronoi)
-
 - **Description**: This function first calls on functions within designMatrix.py to instantiate both the Voronoi decomposition and structural metrics as local variables. The latter are then compiled into a new array (the design matrix), and returned from this function. There is an additional step in which edge particles are removed from the design matrix.
 - **Inputs**: 
   - _centroids_: 2D numpy array with x,y positions of NPs (output either from Particles() or Subpixel())
@@ -101,13 +104,32 @@ _If there are variables repeated in multiple functions, they are only defined in
   - _distance_diffs_: .txt; a 1D array containing all of the differences between the two closest NNs for each NP
   - _designmatrix_: .txt and .npz; a 2D array containing the full design matrix
 
+#### Clustering(directory, filename, DesignMatrixTemp, x_size, y_size, ShowCluster)
+- **Description**: This function prepares the design matrix by calling on functions that normalize the design matrix and then do the actual classification of particles.
+- **Inputs**:
+  - _DesignMatrixTemp_: the 2D numpy array containing the design matrix, which is pulled from an .npz file
+  - _ShowCluster_: IF you want to produce the classified image and save the graphic
+- **Outputs**:
+  - none
+- **Save To Drive**:
+  - _labels_: .txt and .npz; labels for each of the particles 
 
-**Specify the sections of code to run:
+### Executed Code in the Runfile
+The actual operation of the code is simplified into a series of _if_ statements at the bottom of runfile.py. These _if_ statements control which of the above functions actually run when the code is executed. It is divided so that you can , for example, identify only the particle locations for a series of images. 
 
-- CentroidsRun ; Identifty NPs and generate the centroid .npz file.
-- DesignMatrixRun ; 
+#### General Runfile Parameters
+```python
+CentroidsRun = False #Turns on and off the particle fitting code.
+DesignMatrixRun = False #Turns on and off the design matrix part of the code.
+ClusterRun = True #Turns on and off the clustering part of the code.
+CleanDesignMatrix = True #Turns on and off the removal of defective NPs from the final design matrix, from which you extract structural metrics.
+directory = r'C:/Users/Alex/Desktop/SEM Image Analysis Photobase/PBG z gradient check/' #Folder containing the images.
+sizeSet = True #Turns on and off auto-sizing. If True, will determine the image size from the image itself. Otherwise, uses x,y sizes below
+x_size = int(1536)
+y_size = int(1024)
+```
 
-
+**Depending on which of the above parameters are set to True of false, upon execution of the code, those operations will run. Each of these _if_ statements is capable of running alone because the necessary function inputs are loaded from .npz files rather than being stored as local variables.**
 
 
 
