@@ -36,46 +36,77 @@ There are a variety of ways of evaluating the structural order/disorder of a lat
 3. Navigate in the Anaconda prompt to the folder containing the scripts, then run: /python runfile.py
 
 
-### Description of contents and functionality:
+### Scripts:
 
-Note about software structure: The software is designed so that there are 4 scripts (Scripts 1-4) that contain functions that never need user input. One should almost never need to open those scripts to modify the code. All of the user input and the actual flow of code is contained in runfile.py.
-
+_The software is designed so that there are 4 scripts (Scripts 1-4) that contain functions that never need user input. One should almost never need to open those scripts to modify the code. All of the user input and the actual flow of code is contained in runfile.py. Running scripts 1-4 alone results in no output._
 
 #### Script 1. findParticles.py
-- Description: Contains a single function responsible for the identification of particles with single-pixel resolution (Step 1a).
-- Input: Image file, a tiff.
-- Output: returns the x,y positions of each NP as a 2D numpy array.
-
-
+- Contains a single function responsible for the identification of particles with single-pixel resolution (Step 1a).
 
 #### Script 2. subpixel.py
-- Description: Calculates the subpixel position of NPs, starting with the output from Script 1 as an initial guess.
-- Input: The output from FindBlobs() located in Script 1. x,y positions of each NP.
-- Output: An .npz file entitled "centroid_subpixel**.npz" that contains the updates, subpixel resolution centroid positions of each NP.
-
-
+- Calculates the subpixel position of NPs, starting with the output from Script 1 as an initial guess.
 
 #### Script 3. designMatrix.py
-- Description: Performs the Voronoi decomposition, then extracts structural metrics and returns them as the outputs of various functions. Descriptions of the various functions and their outputs are provided in-code.
-- Input: Subpixel centroid .npz file. 
-- Output: Various structural metrics as 1D numpy arrays. These are compiled in runfile.py into the design matrix (vide infra).
-
-
+- Performs the Voronoi decomposition, then extracts structural metrics and returns them as the outputs of various functions. Descriptions of the various functions and their outputs are provided in-code.
 
 #### Script 4. clusterAnalysis.py
-- Description: Classifies particles in the images based on their structural feature values.
-- Input: The design matrix assembled from various outputs of Script 3 functions.
-- Output: Class labels for each of the NPs. NPs in different classes can be removed in runfile.py
-
-
+- Classifies particles in the images based on their structural feature values.
 
 #### Script 5. runfile.py
-- Description: Contains the run functionality of the code; brings together components from Scripts 1-4 to actually do the whole process.
-- Input: (see below).
-- Output: (see below).
+- Contains the run functionality of the code; brings together components from Scripts 1-4 to actually do the whole process. See below.
 
-## Using The Code
-**Using runfile.py to modify and run the code.**
+## The Runfile (runfile.py)
+When running code, all modifications are made in the runfile.py script. 
+
+### Runfile Functions
+_If there are variables repeated in multiple functions, they are only defined in the top function._
+
+#### Particles(filename, x_size, y_size, ShowBlobs, min_sigma, max_sigma, threshold)
+- **Inputs**:
+  - _filename_: image file path
+  - _x_size_: number of pixels in x dimension
+  - _y_size_: number of pixels in y dimension
+  - _ShowBlobs_: IF you want to show the resulting image
+  - _min_sigma_: smallest size of blob radius for coarse NP fitting
+  - _max_sigma_: largest size of blob radius for coarse NP fitting
+  - _threshold_: setting for blob detection; Lower threshold means higher susceptibility to noise.
+- **Outputs**:
+  - _blobs_out_: 2D numpy array with x,y coordinates of each NP
+- **Save To Drive**:
+  - nothing
+
+#### Subpixel(directory, filename, centroids, x_size, y_size, conversion, spacing, ShowSubpixels)
+
+- **Inputs**: 
+  - _directory_: image folder path (why is this in here?)
+  - _centroids_: 2D numpy array with x,y coordinates of each NP
+  - _conversion_: float value that converts pixels into true distance (pixels/nm)
+  - _spacing_: sets the size of the window used for sub-pixel fitting of each particle
+  - _ShowSubpixels_: IF you want to show each NP fitting (~10000 per image; ill-advised)
+- **Outputs**:
+  - _new_centroids_: 2D numpy array with x,y positions of NPs with subpixel precision
+- **Save to Drive**:
+  - _new_centroids_: .npz; see above description
+
+#### MakeDesignMatrix(directory, filename,centroids,x_size, y_size, ShowVoronoi)
+
+- **Description**: This function first calls on functions within designMatrix.py to instantiate both the Voronoi decomposition and structural metrics as local variables. The latter are then compiled into a new array (the design matrix), and returned from this function. There is an additional step in which edge particles are removed from the design matrix.
+- **Inputs**: 
+  - _centroids_: 2D numpy array with x,y positions of NPs (output either from Particles() or Subpixel())
+  - _ShowVoronoi_: IF you want to show the Voronoi diagram for each image in the folder
+- **Outputs**:
+  - _DesignMatrix_: complete design matrix with edge particles removed, ready for clustering
+- **Save to Drive**:
+  - _distances_: .txt; a 1D array containing all of the distances for nearest neighbors within an image
+  - _distance_diffs_: .txt; a 1D array containing all of the differences between the two closest NNs for each NP
+  - _designmatrix_: .txt and .npz; a 2D array containing the full design matrix
+
+
+**Specify the sections of code to run:
+
+- CentroidsRun ; Identifty NPs and generate the centroid .npz file.
+- DesignMatrixRun ; 
+
 
 
 
