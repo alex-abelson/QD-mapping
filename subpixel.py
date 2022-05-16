@@ -94,6 +94,5 @@ def xySP(x0, y0, spacing, image, plot):
         ax.imshow(smallImage)
         ax.contour(x,y,data_fitted.reshape(x.shape),8,colors='w')
         plt.show()
-
     return x_SP, y_SP, 0 #x and y position of QDs
 

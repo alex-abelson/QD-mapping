@@ -10,8 +10,11 @@ plt.rcParams.update({'font.size': 22})
 import matplotlib.cm as cm
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import numpy as np
+import skimage
+import utilities as ut
 
-def VoronoiColorPlot(InputMatrix,IndexColumn,DataColumn,centroids,label, x_size, y_size):
+def VoronoiColorPlot(InputMatrix,IndexColumn,DataColumn,centroids,label, x_size, y_size,filename):
+    image = ut.LoadImage(filename, x_size, y_size) 
     x = centroids[:,1]
     y = centroids[:,0] 
     vor = Voronoi(np.vstack((x,y)).T) 
@@ -28,20 +31,20 @@ def VoronoiColorPlot(InputMatrix,IndexColumn,DataColumn,centroids,label, x_size,
 
 
     fig2,ax2= plt.subplots()
-
-    fig2=voronoi_plot_2d(vor, ax=ax2,show_points=False, show_vertices=False, s=1)
+    skimage.io.imshow(image)
+    fig2=voronoi_plot_2d(vor, ax=ax2,show_points=False, show_vertices=False)
     
     for r in range(len(dc)):
         r0=int(ic[r])
         region = vor.regions[vor.point_region[r0]]
         if not -1 in region:
             polygon = [vor.vertices[i] for i in region]
-            plt.fill(*zip(*polygon), color=mapper.to_rgba(dc[r]))
+            plt.fill(*zip(*polygon), color=mapper.to_rgba(dc[r]), alpha=0.6)
         
         
     fig2.colorbar(mapper,ax=ax2,label=label)
 
-    #ax2.set_xlim(0,x_size)
-    #ax2.set_ylim(0,y_size)
+    ax2.set_xlim(0,x_size)
+    ax2.set_ylim(y_size,0)
 
     plt.show()

@@ -38,6 +38,7 @@ def NNDistance(vor,NNList):
     stdDistance = []
     Distances = []
     NNDiff = []
+
     
     for i,i_xy in enumerate(vor.points):
         DistanceDummy = []
@@ -49,21 +50,25 @@ def NNDistance(vor,NNList):
         if len(DistanceDummyNP!=0):
             avgDistance.append(np.mean(DistanceDummyNP))
             stdDistance.append(np.std(DistanceDummyNP))
-            Distances.append(DistanceDummy)
-            
-            #Used for caluclating the difference between shortest two distances.
-            NNDiff_temp = np.sort(DistanceDummyNP)
-            NNDiff.append(NNDiff_temp[1]-NNDiff_temp[0])
         else:
             avgDistance.append(0)
             stdDistance.append(0)
-        #if len(DistanceDummyNP)==6:
-            #Distances.append(DistanceDummyNP)
-        #else:
-            #Distances.append([0,0,0,0,0,0])
     
-    Distances=np.hstack(Distances) 
+        if len(DistanceDummyNP)==6:
+            Distances.append(np.sort(DistanceDummyNP))
+        elif len(DistanceDummyNP)>6:
+            x = np.sort(DistanceDummyNP)[0:6]
+            Distances.append(x)
+        else:
+            DistanceDummyNP=np.sort(DistanceDummyNP)
+            n = 6-len(DistanceDummyNP)
+            x = np.pad(DistanceDummyNP, (0,n), constant_values=0)
+            Distances.append(x)
 
+        Holder = np.sort(DistanceDummyNP)
+        NNDiff.append(Holder[1]-Holder[0])
+
+    
     return avgDistance, stdDistance, Distances, NNDiff
 
 #Complex set of calculations that identifies each QD and its vertices,
@@ -150,11 +155,11 @@ def BondOrder(vor, NNList):
 def CalcArea(vor):
     Areas = np.zeros(vor.npoints)    
     for i,reg_num in enumerate(vor.point_region):
-        indices = vor.regionsp[reg_num]
+        indices = vor.regions[reg_num]
         if -1 in indices:
             Areas[i] = np.inf
         else:
-            Areas[i] = ConvexHull(vor.vertices[indices].volume)
+            Areas[i] = ConvexHull(vor.vertices[indices]).area
             
     return Areas
 

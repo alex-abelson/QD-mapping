@@ -29,7 +29,7 @@ def PrepareData(DM_Raw):
     return DM_Scaled
 
 
-def Labels(DesignMatrix, eps, method= "DBSCAN", numBins=3):
+def Labels(DesignMatrix, method= "DBSCAN", numBins=3):
     if method == 'DBSCAN':
         
         #plt.close()
@@ -52,9 +52,9 @@ def Labels(DesignMatrix, eps, method= "DBSCAN", numBins=3):
         elb = rotor.get_elbow_index()
 
         eps = distances[elb,1]
-        print ("Running cluster analysis with eps={}".format(eps))
+
         
-        db = cluster.DBSCAN(eps=eps, min_samples=12).fit(DesignMatrix)
+        db = cluster.DBSCAN(eps=eps, min_samples=30).fit(DesignMatrix)
         core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
         core_samples_mask[db.core_sample_indices_] = True
         labels = db.labels_
@@ -62,6 +62,7 @@ def Labels(DesignMatrix, eps, method= "DBSCAN", numBins=3):
         n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
         n_noise_ = list(labels).count(-1)
         
+        print("Running cluster analysis with eps={}".format(eps))
         print('{} QDs fed into clustering algorithm.'.format(len(DesignMatrix)))
         print('Estimated number of clusters: %d' % n_clusters_)
         print('Estimated number of noise points: %d' % n_noise_)
@@ -78,12 +79,11 @@ def Labels(DesignMatrix, eps, method= "DBSCAN", numBins=3):
     return labels
 
 
-def ClusterFigure(directory, labels,DesignMatrix,image,filename):
+def ClusterFigure(directory, labels,DesignMatrix,image,filename,BlobSize):
     if not os.path.exists(directory + "outputs"):
         os.mkdir(directory + "outputs")
     output_name=directory + "outputs/" +"clusterfig_" + Path(filename).stem
-	
-    plt.close()
+
     
     fig, ax = plt.subplots()
     skimage.io.imshow(image)
@@ -97,15 +97,15 @@ def ClusterFigure(directory, labels,DesignMatrix,image,filename):
         bounds = np.linspace(np.amin(labels)-.5,np.amax(labels)+.5,N+1)
         norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)        
         
-        scat = ax.scatter(DesignMatrix[:,1], DesignMatrix[:,2],  s=10, c=labels, cmap=cmap,  norm = norm)
+        scat = ax.scatter(DesignMatrix[:,1], DesignMatrix[:,2],  s=BlobSize, c=labels, cmap=cmap,  norm = norm, facecolors='none')
         cb = plt.colorbar(scat, spacing='proportional',ticks=np.arange(np.min(labels),np.max(labels)+1))
       
-    plt.savefig(output_name,dpi=1200)
-    plt.show()
+    plt.savefig(output_name,dpi=600)
+    #plt.show()
   
     
 
-def RemoveDefectsFromClustering(directory, filename, labels, designmatrix):
+def RemoveDefectsFromClustering(directory, filename, labels, matrix):
     SaveLabels = np.array([0])
     DotsToDelete = []
     
@@ -113,16 +113,11 @@ def RemoveDefectsFromClustering(directory, filename, labels, designmatrix):
         if item not in SaveLabels:
             DotsToDelete.append(i)
         
-    DesignMatrixCleaned = np.delete(designmatrix,DotsToDelete, axis=0)
+    MatrixCleaned = np.delete(matrix,DotsToDelete, axis=0)
     
-    print ('Started with', len(labels), 'particles, now have ', len(DesignMatrixCleaned))
+    return MatrixCleaned
     
-    
-    header = "Image ID = " + Path(filename).stem + " Index, X, Y, Nearest Neighbors, Avg NN Distance, Psi4, Psi6, ArgSin(Psi4), ArgCos(Psi4)" 
-    
-    output_name=directory + "outputs/" +"cleanedDM_" + Path(filename).stem
-    np.savetxt(output_name + ".txt",DesignMatrixCleaned,delimiter = ',', header = header)
-    
+
     
 
 

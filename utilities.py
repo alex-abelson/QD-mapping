@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 def LoadImage(fileName,x_size, y_size):
     y_size=int(y_size)
     x_size=int(x_size)
-    image = skimage.io.imread(fileName)[0:y_size,0:x_size] #import image
+    image = skimage.io.imread(fileName, as_gray=True)[0:y_size,0:x_size] #import image
     return image
 
 def asvoid(arr): #Converts an ND-array to a 1D array. https://stackoverflow.com/a/16216866/190597
@@ -50,3 +50,14 @@ def PlotImage(image):
 def GetDimensions(fileName):
     image = skimage.io.imread(fileName)[:,:] #import image
     return image.shape
+
+def PlotBlobs(ShowBlobs,blobs,image):
+    if ShowBlobs:
+        print ("plotting")
+        fig, ax = plt.subplots()
+        skimage.io.imshow(image)
+        if len(blobs) != 0:
+            plt.plot(blobs[:, 1], blobs[:, 0], 'r.')
+        plt.show()
+        fig.canvas.draw()
+    

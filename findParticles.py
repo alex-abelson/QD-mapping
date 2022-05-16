@@ -25,16 +25,10 @@ def FindBlobs(image, ShowBlobs, min_sigma=2, max_sigma=3, threshold=0.01):
     blobs = skimage.feature.blob_log(image, min_sigma=min_sigma, max_sigma=max_sigma, num_sigma=4, 
                                      threshold=threshold, exclude_border = False)
     
-    if ShowBlobs:
-        print ("plotting")
-        fig, ax = plt.subplots()
-        skimage.io.imshow(image)
-        if len(blobs) != 0:
-            plt.plot(blobs[:, 1], blobs[:, 0], 'r.')
-        plt.show()
-        fig.canvas.draw()
-    
     return blobs
+    
+
+    
     
     
 
